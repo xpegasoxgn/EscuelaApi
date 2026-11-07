@@ -2,7 +2,7 @@
 using EscuelaApi.Infrastructura.Conexiones;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using EscuelaApi.Dtos;
 namespace EscuelaApi.Controllers
 {
     [ApiController]
@@ -23,6 +23,34 @@ namespace EscuelaApi.Controllers
 
             
         }
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<List<Estudiantes>>> obtenerPorId(int id)
+        {
+            var estudiantes = await _context.Estudiantes.AsNoTracking().FirstOrDefaultAsync(e => e.IdEstudiante == id);
+            if(estudiantes is null)
+            {
+                return NotFound(new { mensaje = $"No existe un estudiante con ID  {id}. favor de revisar" });
+            }
+
+            return Ok(estudiantes);
+
+
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Estudiantes>> Crear(
+            [FromBody] CrearEstudiantesDto solicitud)
+        {
+            var estudiante = new Estudiantes { Nombre = solicitud.Nombre.Trim() };
+            //EF core prepara el registro nuevo
+            _context.Estudiantes.Add(estudiante);
+
+            await _context.SaveChangesAsync();
+            //respondemos 201 y damos la ruta para consultar el alumno
+
+            return CreatedAtAction(nameof(obtenerPorId), new { id= estudiante.IdEstudiante},estudiante);
+        }
+
 
 
     }
