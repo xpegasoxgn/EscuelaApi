@@ -51,7 +51,24 @@ namespace EscuelaApi.Controllers
             return CreatedAtAction(nameof(obtenerPorId), new { id= estudiante.IdEstudiante},estudiante);
         }
 
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Actualizar(int id, [FromBody] CrearEstudiantesDto solicitud)
+        {
+            //mediante el id obtenemos el registro de la base de datos
+            var estudiante = await _context.Estudiantes.FindAsync(id);
+            // validacion para verificar si el registro existe, si no existe devolvemos un 404
+            if (estudiante == null)
+            {
+                return NotFound(new { mensaje = $"No existe un estudiante con ID {id}. favor de revisar" });
+            }
+            //cambiamos el nombre del regitro existente, no su id
+            estudiante.Nombre = solicitud.Nombre.Trim();
+            // EF core prepara la actualizacion del registro
+            await _context.SaveChangesAsync();
 
 
+
+            return CreatedAtAction(nameof(obtenerPorId), new { id = estudiante.IdEstudiante }, estudiante);
+        }
     }
 }
