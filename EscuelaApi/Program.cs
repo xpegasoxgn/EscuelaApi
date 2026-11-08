@@ -1,6 +1,7 @@
 using EscuelaApi.Infrastructura.Conexiones;
+using EscuelaApi.Servicios;
 using Microsoft.EntityFrameworkCore;
-
+using Microsoft.Extensions.Options;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -16,6 +17,11 @@ builder.Services.AddDbContext<EscuelaDbContext>(options =>
 {
     options.UseSqlServer(cadenaConexion);
 });
+
+builder.Services.AddDbContext<EscuelaDbContext>(options => { options.UseSqlServer(cadenaConexion); });
+//cuando  el controlador pida la interfaz  intregarle la impletacion
+builder.Services.AddScoped<IEstudianteService, EstudianteService>();
+
 
 
 var app = builder.Build();

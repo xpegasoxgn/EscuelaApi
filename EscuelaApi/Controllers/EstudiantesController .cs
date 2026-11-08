@@ -3,6 +3,7 @@ using EscuelaApi.Infrastructura.Conexiones;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EscuelaApi.Dtos;
+using EscuelaApi.Servicios;
 namespace EscuelaApi.Controllers
 {
     [ApiController]
@@ -10,10 +11,12 @@ namespace EscuelaApi.Controllers
     public class EstudiantesController: ControllerBase
     {
         private readonly EscuelaDbContext _context;
+        private readonly IEstudianteService _estudianteService;
 
-        public EstudiantesController(EscuelaDbContext context)
+        public EstudiantesController(EscuelaDbContext context, IEstudianteService estudianteService)
         {
             _context = context;
+            _estudianteService = estudianteService;
         }
         [HttpGet]
         public async Task<ActionResult<List<Estudiantes>>> listar()
@@ -69,6 +72,21 @@ namespace EscuelaApi.Controllers
 
 
             return CreatedAtAction(nameof(obtenerPorId), new { id = estudiante.IdEstudiante }, estudiante);
+        }
+
+        //podemos borrar a un estudiante  de pruebe que no tenga inscripciones pero no uno que ya este incrito en una materia
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Eliminar(int id)
+        {
+            var resultado = await _estudianteService.EliminarAsync(id);
+
+            return resultado switch
+            {
+                ResultadoEliminarEstudiante.Eliminado => NoContent(),
+                ResultadoEliminarEstudiante.NoEncontrado => NotFound(new { mensaje = $"No existe un estudiante con ID {id}. favor de revisar" }),
+                ResultadoEliminarEstudiante.TieneInscripciones => BadRequest(new { mensaje = $"El estudiante con ID {id} tiene inscripciones y no puede ser eliminado." }),
+                _ => StatusCode(500, new { mensaje = "Ocurrió un error inesperado." })
+            };
         }
     }
 }
