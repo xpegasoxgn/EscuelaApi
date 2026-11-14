@@ -1,20 +1,25 @@
 using EscuelaApi.Infraestructura.Conexiones;
+using EscuelaApi.Servicios;
 using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-//leer la cadena de conexion desde appsettings.json
-var cadenaConexion = builder.Configuration.GetConnectionString("EscuelaBD");
-//registra el contexto para que los controladores puedan recibirlo
 
+// Leer la cadena de conexion desde appsettings.json
+var cadenaConexion = builder.Configuration.GetConnectionString("EscuelaBD");
+
+// Registra el contexto para que los controladores puedan recibirlo
 builder.Services.AddDbContext<EscuelaDbContext>(options =>
 {
     options.UseSqlServer(cadenaConexion);
 });
+
+// Cuando el controlador pida la interfaz IEstudianteService, entregarle la implementacion EstudianteService
+builder.Services.AddScoped<IEstudianteService, EstudianteService>();
 
 var app = builder.Build();
 
