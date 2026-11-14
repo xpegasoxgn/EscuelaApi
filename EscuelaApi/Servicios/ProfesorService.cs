@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EscuelaApi.Servicios
 {
-    // paso 4 definir la service que implementa la interfaz
     public class ProfesorService : IProfesorService
     {
         private readonly EscuelaDbContext _db;
@@ -22,8 +21,8 @@ namespace EscuelaApi.Servicios
         public async Task<Profesor> CrearAsync(string nombre)
         {
             var profesor = new Profesor { Nombre = nombre.Trim() };
-            _db.Profesores.Add(profesor); // preparamos el registro
-            await _db.SaveChangesAsync(); // lo guarda y obtiene el id generado
+            _db.Profesores.Add(profesor);
+            await _db.SaveChangesAsync();
             return profesor;
         }
     }

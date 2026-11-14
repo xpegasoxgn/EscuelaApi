@@ -18,10 +18,8 @@ builder.Services.AddDbContext<EscuelaDbContext>(options =>
     options.UseSqlServer(cadenaConexion);
 });
 
-// Cuando el controlador pida la interfaz IEstudianteService, entregarle la implementacion EstudianteService
+// Inyeccion de dependencias de servicios
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
-
-// Paso 5: registrar el servicio de profesores en program.cs
 builder.Services.AddScoped<IProfesorService, ProfesorService>();
 
 var app = builder.Build();
