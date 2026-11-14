@@ -26,7 +26,7 @@ namespace EscuelaApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] CrearProfesorDTO solicitud)
         {
-            var profesor = await _profesorService.CrearAsync(solicitud.Nombre);
+            var profesor = await _profesorService.CrearAsync(solicitud.Nombre.Trim());
             return StatusCode(StatusCodes.Status201Created, profesor);
         }
     }
