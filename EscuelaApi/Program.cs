@@ -21,6 +21,9 @@ builder.Services.AddDbContext<EscuelaDbContext>(options =>
 // Cuando el controlador pida la interfaz IEstudianteService, entregarle la implementacion EstudianteService
 builder.Services.AddScoped<IEstudianteService, EstudianteService>();
 
+// Paso 5: registrar el servicio de profesores en program.cs
+builder.Services.AddScoped<IProfesorService, ProfesorService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
