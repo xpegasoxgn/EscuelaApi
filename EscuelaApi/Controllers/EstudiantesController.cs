@@ -20,7 +20,10 @@ namespace EscuelaApi.Controllers
             _estudianteService = estudianteService;
         }
 
-        // GET: api/estudiantes
+        /// <summary>
+        /// GET: api/estudiantes
+        /// Obtiene la lista de todos los estudiantes registrados.
+        /// </summary>
         [HttpGet]
         public async Task<ActionResult<List<Estudiante>>> Listar()
         {
@@ -28,60 +31,80 @@ namespace EscuelaApi.Controllers
                 .AsNoTracking()
                 .OrderBy(e => e.IdEstudiante)
                 .ToListAsync();
+
             return Ok(estudiantes);
         }
 
-        // GET: api/estudiantes/1
+        /// <summary>
+        /// GET: api/estudiantes/{id}
+        /// Busca un estudiante por su clave primaria.
+        /// Retorna 200 OK con el estudiante o 404 NotFound si no existe.
+        /// </summary>
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Estudiante>> ObtenerPorId(int id)
         {
             var estudiante = await _context.Estudiantes
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.IdEstudiante == id);
+
             if (estudiante == null)
             {
                 return NotFound(new { mensaje = $"No existe un estudiante con ID {id}, favor de revisar." });
             }
+
             return Ok(estudiante);
         }
 
-        // POST: api/estudiantes
+        /// <summary>
+        /// POST: api/estudiantes
+        /// Registra un nuevo estudiante a partir del DTO recibido en el cuerpo JSON.
+        /// Retorna 201 Created junto a la URL de consulta en el encabezado Location.
+        /// </summary>
         [HttpPost]
         public async Task<ActionResult<Estudiante>> Crear([FromBody] CrearEstudianteDTO solicitud)
         {
-            var estudiante = new Estudiante { Nombre = solicitud.Nombre.Trim() };
-            // EF Core prepara el registro nuevo
+            var estudiante = new Estudiante
+            {
+                Nombre = solicitud.Nombre.Trim()
+            };
+
             _context.Estudiantes.Add(estudiante);
             await _context.SaveChangesAsync();
 
-            // Respondemos 201 y damos la ruta para consultar el alumno
             return CreatedAtAction(nameof(ObtenerPorId), new { id = estudiante.IdEstudiante }, estudiante);
         }
 
-        // PUT: api/estudiantes/1
+        /// <summary>
+        /// PUT: api/estudiantes/{id}
+        /// Actualiza el nombre de un estudiante existente.
+        /// Retorna 201 Created con el registro modificado, o 404 NotFound si el estudiante no existe.
+        /// </summary>
         [HttpPut("{id:int}")]
         public async Task<ActionResult> Actualizar(int id, [FromBody] CrearEstudianteDTO solicitud)
         {
-            // Mediante el ID obtenemos el registro de la base de datos
+            // 1. Buscar el registro en la base de datos
             var estudiante = await _context.Estudiantes.FindAsync(id);
-
-            // Validacion para verificar si el registro existe, si no devolvemos un 404
             if (estudiante == null)
             {
                 return NotFound(new { mensaje = $"No existe un estudiante con ID {id}. Favor de revisar." });
             }
 
-            // Cambiamos el nombre del registro existente, no su ID
+            // 2. Modificar solo los campos editables
             estudiante.Nombre = solicitud.Nombre.Trim();
 
-            // EF Core prepara la actualizacion del registro
+            // 3. Confirmar cambios en EF Core
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(ObtenerPorId), new { id = estudiante.IdEstudiante }, estudiante);
         }
 
-        // DELETE: api/estudiantes/1
-        // Regla: podemos borrar a un estudiante de prueba que no tenga inscripciones, pero no uno que ya este inscrito en una materia
+        /// <summary>
+        /// DELETE: api/estudiantes/{id}
+        /// Elimina un estudiante aplicando la regla de negocio mediante la capa de Servicios.
+        /// - 204 NoContent: Eliminado exitosamente (no tenía inscripciones).
+        /// - 404 NotFound: El estudiante no existe en la BD.
+        /// - 400 BadRequest: El estudiante tiene inscripciones activas y no puede ser eliminado.
+        /// </summary>
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> Eliminar(int id)
         {

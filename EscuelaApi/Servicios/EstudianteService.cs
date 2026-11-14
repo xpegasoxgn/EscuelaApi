@@ -4,6 +4,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EscuelaApi.Servicios
 {
+    /// <summary>
+    /// Implementación de la lógica de negocio para la gestión de Estudiantes.
+    /// Encapsula las reglas de validación y acceso a datos mediante EF Core.
+    /// </summary>
     public class EstudianteService : IEstudianteService
     {
         private readonly EscuelaDbContext _db;
@@ -13,33 +17,35 @@ namespace EscuelaApi.Servicios
             _db = db;
         }
 
+        /// <summary>
+        /// Aplica la regla de negocio: "Un estudiante solo puede eliminarse si no tiene inscripciones activas".
+        /// </summary>
         public async Task<ResultadoEliminarEstudiante> EliminarAsync(int id)
         {
+            // Paso 1: Verificar si el estudiante existe en la base de datos
             var estudiante = await _db.Estudiantes.FindAsync(id);
-
-            // Verificamos si existe el estudiante
             if (estudiante == null)
             {
                 return ResultadoEliminarEstudiante.NoEncontrado;
             }
 
-            // Validar si tiene al menos una inscripción pendiente
+            // Paso 2: Validar si el estudiante tiene al menos una inscripción registrada
             bool tieneInscripcion = await _db.Inscripciones.AnyAsync(i => i.IdEstudiante == id);
             if (tieneInscripcion)
             {
                 return ResultadoEliminarEstudiante.TieneInscripciones;
             }
 
+            // Paso 3: Proceder a eliminar de la tabla y confirmar los cambios en la BD
             try
             {
-                // Propiedad de EF Core para eliminar
                 _db.Estudiantes.Remove(estudiante);
                 await _db.SaveChangesAsync();
                 return ResultadoEliminarEstudiante.Eliminado;
             }
             catch (DbUpdateException ex) when ((ex.InnerException as SqlException)?.Number == 547)
             {
-                // Error de restricción de clave foránea en SQL Server
+                // Error 547 en SQL Server: Violación de restricción de clave foránea (FK_Inscripcion_Estudiante)
                 return ResultadoEliminarEstudiante.TieneInscripciones;
             }
         }
