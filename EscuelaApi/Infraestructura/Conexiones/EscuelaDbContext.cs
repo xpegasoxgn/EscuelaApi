@@ -10,6 +10,7 @@ namespace EscuelaApi.Infraestructura.Conexiones
         }
 
         public DbSet<Estudiante> Estudiantes { get; set; }
+        public DbSet<Profesor> Profesores => Set<Profesor>();
         public DbSet<Curso> Cursos => Set<Curso>();
         public DbSet<Inscripcion> Inscripciones => Set<Inscripcion>();
 
@@ -17,6 +18,9 @@ namespace EscuelaApi.Infraestructura.Conexiones
         {
             modelBuilder.Entity<Estudiante>().ToTable("Estudiante", "dbo");
             modelBuilder.Entity<Estudiante>().HasKey(e => e.IdEstudiante);
+
+            modelBuilder.Entity<Profesor>().ToTable("Profesor", "dbo");
+            modelBuilder.Entity<Profesor>().HasKey(e => e.IdProfesor);
 
             modelBuilder.Entity<Curso>().ToTable("Curso", "dbo");
             modelBuilder.Entity<Curso>().HasKey(e => e.IdCurso);
