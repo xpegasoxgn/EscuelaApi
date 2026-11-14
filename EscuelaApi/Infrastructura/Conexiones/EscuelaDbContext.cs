@@ -1,4 +1,5 @@
 ﻿using EscuelaApi.Entidades;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 
@@ -33,10 +34,18 @@ namespace EscuelaApi.Infrastructura.Conexiones
             modelBuilder.Entity<Inscripcion>().ToTable("Inscripcion", "dbo");
             modelBuilder.Entity<Inscripcion>().HasKey(e => e.IdCurso);
 
+            //paso 3 mapear la entidad en la tabla bd
+            modelBuilder.Entity<Profesor>().ToTable("Profesor", "dbo");
+            modelBuilder.Entity<Profesor>().HasKey(e => e.IdProfesor);
+
+
         }
 
         public DbSet<Curso> Cursos => Set<Curso>();
         public DbSet<Inscripcion> Inscripciones => Set<Inscripcion>();
+
+        // paso 2  definimo el array de profesores
+        public DbSet<Profesor> Profesores => Set<Profesor>();
 
     }
 }
