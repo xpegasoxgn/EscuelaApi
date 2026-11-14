@@ -15,22 +15,14 @@ namespace EscuelaApi.Controllers
             _profesorService = profesorService;
         }
 
-        /// <summary>
-        /// GET: api/profesores
-        /// Obtiene la lista completa de profesores a través de la capa de servicio.
-        /// </summary>
+        // GET: api/profesores
         [HttpGet]
         public async Task<IActionResult> Listar()
         {
-            var profesores = await _profesorService.ListarAsync();
-            return Ok(profesores);
+            return Ok(await _profesorService.ListarAsync());
         }
 
-        /// <summary>
-        /// POST: api/profesores
-        /// Crea un nuevo profesor en el sistema delegando la persistencia al servicio.
-        /// Retorna 201 Created con los datos del profesor recién insertado.
-        /// </summary>
+        // POST: api/profesores
         [HttpPost]
         public async Task<IActionResult> Crear([FromBody] CrearProfesorDTO solicitud)
         {

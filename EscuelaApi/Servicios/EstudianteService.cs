@@ -4,10 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EscuelaApi.Servicios
 {
-    /// <summary>
-    /// Implementación de la lógica de negocio para la gestión de Estudiantes.
-    /// Encapsula las reglas de validación y acceso a datos mediante EF Core.
-    /// </summary>
     public class EstudianteService : IEstudianteService
     {
         private readonly EscuelaDbContext _db;
@@ -17,26 +13,24 @@ namespace EscuelaApi.Servicios
             _db = db;
         }
 
-        /// <summary>
-        /// Aplica la regla de negocio: "Un estudiante solo puede eliminarse si no tiene inscripciones activas".
-        /// </summary>
+        /* Regla de negocio: no borrar si el estudiante tiene inscripciones */
         public async Task<ResultadoEliminarEstudiante> EliminarAsync(int id)
         {
-            // Paso 1: Verificar si el estudiante existe en la base de datos
+            // 1. Verificar si existe el estudiante
             var estudiante = await _db.Estudiantes.FindAsync(id);
             if (estudiante == null)
             {
                 return ResultadoEliminarEstudiante.NoEncontrado;
             }
 
-            // Paso 2: Validar si el estudiante tiene al menos una inscripción registrada
+            // 2. Validar si tiene inscripciones activas
             bool tieneInscripcion = await _db.Inscripciones.AnyAsync(i => i.IdEstudiante == id);
             if (tieneInscripcion)
             {
                 return ResultadoEliminarEstudiante.TieneInscripciones;
             }
 
-            // Paso 3: Proceder a eliminar de la tabla y confirmar los cambios en la BD
+            // 3. Si no tiene inscripciones, eliminar
             try
             {
                 _db.Estudiantes.Remove(estudiante);
@@ -45,7 +39,6 @@ namespace EscuelaApi.Servicios
             }
             catch (DbUpdateException ex) when ((ex.InnerException as SqlException)?.Number == 547)
             {
-                // Error 547 en SQL Server: Violación de restricción de clave foránea (FK_Inscripcion_Estudiante)
                 return ResultadoEliminarEstudiante.TieneInscripciones;
             }
         }

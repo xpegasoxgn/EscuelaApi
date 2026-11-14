@@ -15,10 +15,7 @@ namespace EscuelaApi.Controllers
             _db = db;
         }
 
-        /// <summary>
-        /// GET: api/cursos
-        /// Retorna el listado de todos los cursos disponibles en la escuela ordenados por su ID.
-        /// </summary>
+        // GET: api/cursos
         [HttpGet]
         public async Task<IActionResult> Listar()
         {
